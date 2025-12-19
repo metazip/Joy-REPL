@@ -1,4 +1,5 @@
 # Joy-REPL
 A stack-based programming language build in Kotlin
 
-    gnome-terminal -e "java -jar Joy-REPL.jar"
+    cd <Joy-REPL-directory>
+    java -jar Joy-REPL.jar
