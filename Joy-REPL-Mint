@@ -1,0 +1,3 @@
+#!/bin/bash
+gnome-terminal -e "java -jar Joy-REPL.jar"
+
