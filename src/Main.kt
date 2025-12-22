@@ -1,10 +1,9 @@
 
 package org.joyapp.joyofpostfix
 
+import java.io.File
 import java.text.SimpleDateFormat
-//import java.io.BufferedReader
-//import java.io.File
-//import java.io.InputStreamReader
+import java.nio.file.Paths
 import java.util.*
 
 // documentation to find at:
@@ -3237,6 +3236,7 @@ class JoyVM {
                 "date == 11 [ ] '!\n" +
                 "viewurl == 12 [ ] '!\n" +
                 "quit == 13 [ ] '!\n" +
+                "input == 14 [ ] '!\n" +
                 "dump  == identdump print\n" +
                 "words == identlist print\n" +
                 "help  == helpinfo viewurl\n" +
@@ -3249,7 +3249,7 @@ class JoyVM {
 // ----- constants
 const val cterrorcol = "ERROR:   "
 const val ctnullpar  = "(null)"
-const val ctjoypath  = "joy"
+const val ctjoypath  = "Joy-Files"
 
 // ----- for monad side-effects
 const val ctdot      = "."
@@ -3276,6 +3276,52 @@ var line: String = ""
 fun isTopIdent(st: Any, id: Ident): Boolean {
     if (st is Cons) return (st.addr == id)
     else return false
+}
+
+fun lastName(s: String): String {
+    var i: Int = s.length
+    var ch: Char = ' '
+    while (i > 0) {
+        ch = s[i-1]
+        if ((ch == ':') or (ch == '\\') or (ch == '/')) break
+        else i = i - 1
+    }
+    return s.substring(i,s.length)
+}
+
+/*
+fun splitTo(str: String, dm: String): Any {
+    var i: Int
+    var s: String = str
+    var list: Any = Nil()
+    while (s.length > 0) {
+        i = s.indexOf(dm)
+        if (i == -1) {  list = Cons(s,list); s = ""  }
+        else {  list = Cons(s.substring(0,i),list)
+            s = s.substring(i+(dm.length),s.length)
+        } }
+    return nreverse(list)  }
+*/
+
+fun splitLines(str: String): Any {
+    var i: Int = str.length
+    var k: Int = 0
+    var ch: Char = ' '
+    var list: Any = Nil()
+    while (i > 0) {
+        k = i
+        while (i > 0) {
+            ch = str[i-1]
+            if ((ch == 13.toChar()) or (ch == 10.toChar())) break
+            else i = i - 1
+        }
+        list = Cons(str.substring(i,k),list)
+        if (i == 0) break
+        if (str[i-1] == 10.toChar()) i = i - 1
+        if (i == 0) break
+        if (str[i-1] == 13.toChar()) i = i - 1
+    }
+    return list
 }
 
 fun doAct() {
@@ -3314,17 +3360,17 @@ fun doAct() {
                     else      -> println(toValue(i))
                 }
             }
-            /*
+
             3.toLong()  -> {  // load
                 if (stack !is Cons) throw Exception(ctload+ctact + estacknull)
                 val fnm = (stack as Cons).addr
                 stack = (stack as Cons).decr
                 val rname = when (fnm) {
-                    is Ident  -> fnm.pname.substringAfterLast("/")
-                    is String -> fnm.substringAfterLast("/")
+                    is Ident  -> lastName(fnm.pname)
+                    is String -> lastName(fnm)
                     else      -> ""     }
                 if (rname=="") throw Exception(ctload+ctact + errinfname)
-                val rpath = applicationContext.filesDir
+                val rpath = Paths.get("").toAbsolutePath().toString() // applicationContext.filesDir
                 val rdir = File(rpath,ctjoypath)
                 if (!rdir.exists()) rdir.mkdir()
                 val rfile = File(rdir, rname)
@@ -3336,10 +3382,11 @@ fun doAct() {
                 //otxt = vm.deflines(vm.splitTo(itxt,"\n"))
                 //et1.setText(rtxt)
 
-                val txt = vm.deflines(vm.splitTo(rtxt,"\n"))
-                runOnUiThread {  et1.setText(rtxt)  }
+                val txt = vm.deflines(splitLines(rtxt))
+                //stack = Cons(splitLines(rtxt),stack)
+                // runOnUiThread {  et1.setText(rtxt)  }
             }
-            */
+
             /*
             4.toLong()  -> {  // save
                 if (stack !is Cons) throw Exception(ctsave+ctact + estacknull)
@@ -3358,17 +3405,16 @@ fun doAct() {
                 wfile.writeText(wtxt)
             }
             */
-            /*
             5.toLong()  -> {  // loadtext
                 if (stack !is Cons) throw Exception(ctloadtext+ctact + estacknull)
                 val fnm = (stack as Cons).addr
                 stack = (stack as Cons).decr
                 val rname = when (fnm) {
-                    is Ident  -> fnm.pname.substringAfterLast("/")
-                    is String -> fnm.substringAfterLast("/")
+                    is Ident  -> lastName(fnm.pname)
+                    is String -> lastName(fnm)
                     else      -> ""     }
                 if (rname=="") throw Exception(ctloadtext+ctact + errinfname)
-                val rpath = applicationContext.filesDir
+                val rpath = Paths.get("").toAbsolutePath().toString() // applicationContext.filesDir
                 val rdir = File(rpath,ctjoypath)
                 if (!rdir.exists()) rdir.mkdir()
                 val rfile = File(rdir, rname)
@@ -3376,8 +3422,6 @@ fun doAct() {
                 val rtxt = rfile.readText()
                 stack = Cons(rtxt,stack)
             }
-            */
-            /*
             6.toLong()  -> {  // savetext
                 if (stack !is Cons) throw Exception(ctsavetext+ctact + estacknull)
                 val str = (stack as Cons).addr
@@ -3387,42 +3431,38 @@ fun doAct() {
                 stack = (stack as Cons).decr
                 if (str !is String) throw Exception(ctsavetext+ctact + estringexp)
                 val wname = when (fnm) {
-                    is Ident  -> fnm.pname.substringAfterLast("/")
-                    is String -> fnm.substringAfterLast("/")
+                    is Ident  -> lastName(fnm.pname)
+                    is String -> lastName(fnm)
                     else      -> ""      }
                 if (wname=="") throw Exception(ctsavetext+ctact + errinfname)
-                val wpath = applicationContext.filesDir
+                val wpath = Paths.get("").toAbsolutePath().toString() // applicationContext.filesDir
                 val wdir = File(wpath,ctjoypath)
                 if (!wdir.exists()) wdir.mkdir()
                 val wfile = File(wdir,wname)
                 wfile.writeText(str)
             }
-            */
-            /*
             7.toLong()  -> {  // files
-                val fpath = applicationContext.filesDir
+                val fpath = Paths.get("").toAbsolutePath().toString() //applicationContext.filesDir
                 val fdir = File(fpath,ctjoypath)
                 if (!fdir.exists()) fdir.mkdir()
                 val flist = fdir.listFiles()
                 var f: Any = Nil()
                 var s: String
                 flist?.forEach{
-                    s = it.toString().substringAfterLast("/")
+                    s = lastName(it.toString())
                     f = Cons(s,f)  }
                 stack = Cons(vm.nreverse(f),stack)
             }
-            */
-            /*
             8.toLong()  -> {  // fremove
                 if (stack !is Cons) throw Exception(ctfremove+ctact + estacknull)
                 val fnm = (stack as Cons).addr
                 stack = (stack as Cons).decr
                 val rname = when (fnm) {
-                    is Ident  -> fnm.pname.substringAfterLast("/")
-                    is String -> fnm.substringAfterLast("/")
+                    is Ident  -> lastName(fnm.pname)
+                    is String -> lastName(fnm)
                     else      -> ""     }
                 if (rname=="") throw Exception(ctfremove+ctact + errinfname)
-                val rpath = applicationContext.filesDir
+                val rpath = Paths.get("").toAbsolutePath().toString() // applicationContext.filesDir
                 val rdir = File(rpath,ctjoypath)
                 if (!rdir.exists()) rdir.mkdir()
                 val rfile = File(rdir, rname)
@@ -3431,7 +3471,6 @@ fun doAct() {
                     stack = Cons(!rfile.exists(),stack)
                 } else stack = Cons(false,stack)
             }
-            */
             /*
             9.toLong()  -> {  // frename
                 if (stack !is Cons) throw Exception(ctfrename+ctact + estacknull)
@@ -3491,6 +3530,10 @@ fun doAct() {
             13.toLong() -> {  // quit
                 jquit = true
             }
+            14.toLong() -> {  // input
+                val str = readln().toString()
+                stack = Cons(str,stack)
+            }
             else -> {  throw Exception(edoacterr+" - "+n.toString())  }
         }
         //
@@ -3535,4 +3578,13 @@ fun main() {
             runvm = false
             println(cterrorcol+e.message)
         }  }
+}
+
+
+fun mainxyz(args: Array<String>) {
+    println("Hello World!")
+
+    // Try adding program arguments via Run/Debug configuration.
+    // Learn more about running applications: https://www.jetbrains.com/help/idea/running-applications.html.
+    println("Program arguments: ${args.joinToString()}")
 }
