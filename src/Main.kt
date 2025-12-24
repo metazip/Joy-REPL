@@ -7,7 +7,7 @@ import java.nio.file.Paths
 import java.util.*
 
 // documentation to find at:
-const val helpurl = "https://Joy-of-Postfix.github.io"
+const val helpurl = "https://www.github.com/metazip/Joy-REPL"
 
 // ----- to stop processing
 public var runvm: Boolean = false
@@ -3234,13 +3234,14 @@ class JoyVM {
                 //"frename == 9 [ ] '!\n" +
                 "timestamp == 10 [ ] '!\n" +
                 "date == 11 [ ] '!\n" +
-                "viewurl == 12 [ ] '!\n" +
+                "# viewurl == 12 [ ] '!\n" +
                 "quit == 13 [ ] '!\n" +
                 "input == 14 [ ] '!\n" +
+                "run == 15 [ ] '!\n" +
                 "dump  == identdump print\n" +
                 "words == identlist print\n" +
-                "help  == helpinfo viewurl\n" +
-                "google == \"www.google.de\" viewurl\n"
+                "help  == \"JoyOfPostfix.bat\" run\n" +
+                "# google == \"www.google.de\" viewurl\n"
 
     }
 
@@ -3261,6 +3262,7 @@ const val ctsavetext = "savetext"
 const val ctfremove  = "fremove"
 const val ctfrename  = "frename"
 const val ctviewurl  = "viewurl"
+const val ctrun      = "run"
 
 // ----- error messages
 const val errinfname =      "  >>>  error in filename"
@@ -3323,6 +3325,27 @@ fun splitLines(str: String): Any {
     }
     return list
 }
+
+/*
+fun `Given a command, When executed with ProcessBuilder, Then it is executed successfully`() {
+    val result = ProcessBuilder("java", "-version")
+      .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+      .redirectError(ProcessBuilder.Redirect.INHERIT)
+      .start()
+      .waitFor()
+    assertThat(result).isEqualTo(0)
+}
+*/
+/*
+fun String.runCommand(workingDir: File) {
+    ProcessBuilder(*split(" ").toTypedArray())
+        .directory(workingDir)
+        .redirectOutput(Redirect.INHERIT)
+        .redirectError(Redirect.INHERIT)
+        .start()
+        .waitFor(60, TimeUnit.MINUTES)
+}
+*/
 
 fun doAct() {
     if (stack !is Cons) throw Exception(ctact + estacknull)
@@ -3534,6 +3557,13 @@ fun doAct() {
                 val str = readln().toString()
                 stack = Cons(str,stack)
             }
+            15.toLong() -> {
+                if (stack !is Cons) throw Exception(ctrun+ctact + estacknull)
+                val s = (stack as Cons).addr
+                stack = (stack as Cons).decr
+                if (s !is String) throw Exception(ctrun+ctact + estringexp)
+                Runtime.getRuntime().exec(s.split(" ").toTypedArray())
+            }
             else -> {  throw Exception(edoacterr+" - "+n.toString())  }
         }
         //
@@ -3551,12 +3581,13 @@ fun intro() {
 ║  A stack-based programming language build in Kotlin  ║
 ║                                                      ║
 ║  Commands:                                           ║
-║    .      - pop and print top of stack               ║
-║    .s     - print entire stack                       ║
-║    dump   - show all definitions                     ║
-║    words  - show all identifiers                     ║
-║    quit   - exit the REPL                            ║
-║    help   - show tutorial                            ║
+║    .        - pop and print top of stack             ║
+║    .s       - print entire stack                     ║
+║    dump     - show all definitions                   ║
+║    words    - show all identifiers                   ║
+║    quit     - exit the REPL                          ║
+║    help     - show tutorial  (.bat)                  ║
+║    helpinfo - github repository                      ║
 ║                                                      ║
 ╚══════════════════════════════════════════════════════╝
     """.trimIndent())
