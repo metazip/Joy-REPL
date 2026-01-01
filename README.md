@@ -13,5 +13,5 @@ REPL>
 \
 ![heise Download](https://www.heise.de/software/icons/download_logo1.png)\
 Virus checked with 40 virus scanners from heise.de\
-[Download bei heise.de](https://www.heise.de/download/product/mjoy) version 20251224
+[Download bei heise.de](https://www.heise.de/download/product/mjoy) version 20251224 (Java: Win/Linux/Mac)
 
