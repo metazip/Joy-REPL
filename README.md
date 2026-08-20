@@ -15,3 +15,6 @@ REPL>
 Virus checked with 40 virus scanners from heise.de\
 [heise Download](https://www.heise.de/download/product/mjoy) version 20251224 (Java: Win/Linux/Mac/etc)
 
+
+##
+![Joy-REPL](blob:https://github.com/ebf3b95e-2e34-4150-9c89-941620a648a6)
