@@ -17,4 +17,4 @@ Virus checked with 40 virus scanners from heise.de\
 
 
 ##
-![Joy-REPL](https://github.com/ebf3b95e-2e34-4150-9c89-941620a648a6)
+![Joy-REPL](https://github.com/metazip/Joy-REPL/blob/994542a44a6d301c5d12a5a01b0538143e2d8e1d/Joy-REPL.png)
